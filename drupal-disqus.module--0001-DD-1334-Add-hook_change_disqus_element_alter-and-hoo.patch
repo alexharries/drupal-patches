@@ -1,0 +1,53 @@
+From 83b53b9b1ea5b2e53ba71133352c97548cc6c166 Mon Sep 17 00:00:00 2001
+From: Alex Harries <alex@greyhead.co.uk>
+Date: Thu, 23 May 2019 17:51:22 +0100
+Subject: [PATCH] DD-1334 Add hook_change_disqus_element_alter() and
+ hook_change_disqus_thread_alter().
+
+Signed-off-by: Alex Harries <alex@greyhead.co.uk>
+---
+ disqus.module | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/disqus.module b/disqus.module
+index 00e8da3..f1bfb67 100644
+--- a/disqus.module
++++ b/disqus.module
+@@ -112,6 +112,23 @@ function disqus_element_info() {
+  * Post render function of the Disqus element to inject the Disqus JavaScript.
+  */
+ function disqus_element_post_render($children, &$element) {
++  /**
++   * Implement hook_change_disqus_element_alter().
++   *
++   * For example, you could change the Disqus domain here to point to your
++   * staging forum in non-production environments by doing something like...
++   *
++   * function mymodule_change_disqus_element_alter(&$element) {
++   *   if ($_SERVER['IS_STAGING_ENVIRONMENT']) {
++   *     $element['#disqus']['domain'] .= '-staging';
++   *
++   *     // Cater for older Disqus API implementations.
++   *     $element['#disqus']['developer'] = TRUE;
++   *   }
++   * }
++   */
++  drupal_alter('change_disqus_element', $element, $children);
++
+   // Construct the settings to be passed in for Disqus.
+   $disqus = array(
+     'domain' => $element['#disqus']['domain'],
+@@ -119,6 +136,10 @@ function disqus_element_post_render($children, &$element) {
+     'title' => $element['#disqus']['title'],
+     'identifier' => $element['#disqus']['identifier'],
+   );
++
++  // Implement hook_change_disqus_thread_alter().
++  drupal_alter('change_disqus_thread', $disqus);
++
+   if (isset($element['#disqus']['developer']) && $element['#disqus']['developer']) {
+     $disqus['developer'] = 1;
+   }
+-- 
+2.20.1 (Apple Git-117)
+
